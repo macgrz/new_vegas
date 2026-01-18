@@ -53,13 +53,51 @@ class ContactForm(BaseModel):
     topic: str
     message: str
 
-# These env vars must be set in Render for this to work
+def load_mail_config():
+    """
+    Loads email settings from 'MAIL_CONFIG_JSON' env var if present,
+    otherwise falls back to individual environment variables.
+    """
+    json_config = os.getenv("MAIL_CONFIG_JSON")
+    defaults = {
+         "MAIL_USERNAME": "your-email@gmail.com",
+         "MAIL_PASSWORD": "your-app-password",
+         "MAIL_FROM": "your-email@gmail.com",
+         "MAIL_PORT": 587,
+         "MAIL_SERVER": "smtp.gmail.com",
+         "MAIL_RECIPIENT": None 
+    }
+    
+    # 1. Try loading from JSON
+    if json_config:
+        try:
+            config = json.loads(json_config)
+            # Ensure port is an integer
+            if "MAIL_PORT" in config:
+                config["MAIL_PORT"] = int(config["MAIL_PORT"])
+            return config
+        except json.JSONDecodeError:
+            print("Error parsing MAIL_CONFIG_JSON")
+            
+    # 2. Fallback to individual env vars
+    return {
+        "MAIL_USERNAME": os.getenv("MAIL_USERNAME", defaults["MAIL_USERNAME"]),
+        "MAIL_PASSWORD": os.getenv("MAIL_PASSWORD", defaults["MAIL_PASSWORD"]),
+        "MAIL_FROM": os.getenv("MAIL_FROM", defaults["MAIL_FROM"]),
+        "MAIL_PORT": int(os.getenv("MAIL_PORT", defaults["MAIL_PORT"])),
+        "MAIL_SERVER": os.getenv("MAIL_SERVER", defaults["MAIL_SERVER"]),
+        "MAIL_RECIPIENT": os.getenv("MAIL_RECIPIENT")
+    }
+
+# Load config once at startup
+mail_cfg = load_mail_config()
+
 conf = ConnectionConfig(
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME", "your-email@gmail.com"),
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "your-app-password"),
-    MAIL_FROM = os.getenv("MAIL_FROM", "your-email@gmail.com"),
-    MAIL_PORT = int(os.getenv("MAIL_PORT", 587)),
-    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com"),
+    MAIL_USERNAME = mail_cfg.get("MAIL_USERNAME"),
+    MAIL_PASSWORD = mail_cfg.get("MAIL_PASSWORD"),
+    MAIL_FROM = mail_cfg.get("MAIL_FROM"),
+    MAIL_PORT = mail_cfg.get("MAIL_PORT"),
+    MAIL_SERVER = mail_cfg.get("MAIL_SERVER"),
     MAIL_STARTTLS = True,
     MAIL_SSL_TLS = False,
     USE_CREDENTIALS = True,
@@ -82,9 +120,12 @@ async def send_contact_email(form: ContactForm, background_tasks: BackgroundTask
     {form.message}
     """
 
+    # Determine recipient (use explicit recipient or fallback to sender)
+    recipient = mail_cfg.get("MAIL_RECIPIENT") or mail_cfg.get("MAIL_FROM")
+
     message = MessageSchema(
         subject=f"New Vegas Contact: {form.topic}",
-        recipients=[os.getenv("MAIL_RECIPIENT", os.getenv("MAIL_FROM"))], # Send to self/admin
+        recipients=[recipient], 
         body=message_body,
         subtype=MessageType.plain
     )
