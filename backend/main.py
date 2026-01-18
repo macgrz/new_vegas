@@ -1,6 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from pydantic import BaseModel, EmailStr
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 import gspread
 import os
 import json
@@ -44,6 +46,59 @@ def get_sheet_data():
         print(f"Error connecting to Google Sheets: {e}")
         return None
 
+# --- Email Configuration ---
+class ContactForm(BaseModel):
+    name: str
+    email: EmailStr
+    topic: str
+    message: str
+
+# These env vars must be set in Render for this to work
+conf = ConnectionConfig(
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME", "your-email@gmail.com"),
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "your-app-password"),
+    MAIL_FROM = os.getenv("MAIL_FROM", "your-email@gmail.com"),
+    MAIL_PORT = int(os.getenv("MAIL_PORT", 587)),
+    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com"),
+    MAIL_STARTTLS = True,
+    MAIL_SSL_TLS = False,
+    USE_CREDENTIALS = True,
+    VALIDATE_CERTS = True
+)
+
+@app.post("/api/contact")
+async def send_contact_email(form: ContactForm, background_tasks: BackgroundTasks):
+    """
+    Receives contact form data and sends an email to the admin.
+    """
+    message_body = f"""
+    New Contact Request from New Vegas Website:
+    
+    Name: {form.name}
+    Email: {form.email}
+    Topic: {form.topic}
+    
+    Message:
+    {form.message}
+    """
+
+    message = MessageSchema(
+        subject=f"New Vegas Contact: {form.topic}",
+        recipients=[os.getenv("MAIL_RECIPIENT", os.getenv("MAIL_FROM"))], # Send to self/admin
+        body=message_body,
+        subtype=MessageType.plain
+    )
+
+    fm = FastMail(conf)
+    
+    try:
+        # Send in background to not block the response
+        background_tasks.add_task(fm.send_message, message)
+        return {"message": "Email sent successfully"}
+    except Exception as e:
+        print(f"Error sending email: {e}")
+        raise HTTPException(status_code=500, detail="Failed to send email")
+
 @app.get("/")
 def read_root():
     return FileResponse("../frontend/index.html")
@@ -62,10 +117,3 @@ def get_events():
         {"Day": "Środy", "Time": "20:30", "Title": "Stand-Up / Open Mic", "Description": "Testy nowych żartów i występy lokalnych komików."},
         {"Day": "Pt / Sob", "Time": "21:00", "Title": "Koncerty Garażowe", "Description": "Sprawdź FB, kto gra w tym tygodniu."}
     ]
-
-@app.get("/api/data")
-def get_data():
-    return {
-        "title": "Built with Python & React",
-        "description": "This is a full-stack application seamlessly integrating a high-performance FastAPI backend with a dynamic React frontend."
-    }

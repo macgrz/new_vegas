@@ -39,6 +39,45 @@
                 fetchEvents();
             }, []);
 
+            // Contact Form State
+            const [formData, setFormData] = useState({
+                name: '',
+                email: '',
+                topic: '',
+                message: ''
+            });
+            const [formStatus, setFormStatus] = useState('idle'); // idle, loading, success, error
+
+            const handleInputChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({ ...prev, [name]: value }));
+            };
+
+            const handleContactSubmit = async (e) => {
+                e.preventDefault();
+                setFormStatus('loading');
+                try {
+                    const response = await fetch('/api/contact', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData),
+                    });
+
+                    if (response.ok) {
+                        setFormStatus('success');
+                        setFormData({ name: '', email: '', topic: '', message: '' }); // Clear form
+                        setTimeout(() => setFormStatus('idle'), 5000);
+                    } else {
+                        setFormStatus('error');
+                    }
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    setFormStatus('error');
+                }
+            };
+
             return (
                 <div className="container">
                     {/* Navigation */}
@@ -219,23 +258,68 @@
                             <div className="contact-form-wrapper">
                                 <div className="contact-form">
                                     <h3 style={{ marginBottom: '2rem' }}>Formularz kontaktowy</h3>
-                                    <div className="form-group">
-                                        <label>Imię / Nazwa</label>
-                                        <input type="text" placeholder="Jan Kowalski" />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Adres E-mail</label>
-                                        <input type="email" placeholder="jan@example.com" />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Temat</label>
-                                        <input type="text" placeholder="Rezerwacja / Pytanie" />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Wiadomość</label>
-                                        <textarea rows="4" placeholder="Twoja wiadomość..."></textarea>
-                                    </div>
-                                    <button className="btn">Wyślij Wiadomość</button>
+
+                                    {/* Form State Messages */}
+                                    {formStatus === 'success' && (
+                                        <div style={{ backgroundColor: 'rgba(0, 255, 0, 0.1)', color: '#0f0', padding: '1rem', marginBottom: '1rem', border: '1px solid #0f0' }}>
+                                            Wiadomość wysłana! Dzięki.
+                                        </div>
+                                    )}
+                                    {formStatus === 'error' && (
+                                        <div style={{ backgroundColor: 'rgba(255, 0, 0, 0.1)', color: '#f00', padding: '1rem', marginBottom: '1rem', border: '1px solid #f00' }}>
+                                            Coś poszło nie tak. Spróbuj później.
+                                        </div>
+                                    )}
+
+                                    <form onSubmit={handleContactSubmit}>
+                                        <div className="form-group">
+                                            <label>Imię / Nazwa</label>
+                                            <input
+                                                type="text"
+                                                name="name"
+                                                placeholder="Jan Kowalski"
+                                                required
+                                                value={formData.name}
+                                                onChange={handleInputChange}
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Adres E-mail</label>
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                placeholder="jan@example.com"
+                                                required
+                                                value={formData.email}
+                                                onChange={handleInputChange}
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Temat</label>
+                                            <input
+                                                type="text"
+                                                name="topic"
+                                                placeholder="Rezerwacja / Pytanie"
+                                                required
+                                                value={formData.topic}
+                                                onChange={handleInputChange}
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Wiadomość</label>
+                                            <textarea
+                                                name="message"
+                                                rows="4"
+                                                placeholder="Twoja wiadomość..."
+                                                required
+                                                value={formData.message}
+                                                onChange={handleInputChange}
+                                            ></textarea>
+                                        </div>
+                                        <button className="btn" disabled={formStatus === 'loading'}>
+                                            {formStatus === 'loading' ? 'Wysyłanie...' : 'Wyślij Wiadomość'}
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </section>
