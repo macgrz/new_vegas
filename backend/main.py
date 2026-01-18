@@ -18,17 +18,28 @@ SPREADSHEET_NAME = "NewVegasEvents"
 def get_sheet_data():
     """
     Attempts to connect to Google Sheets and fetch events.
-    Returns None if connection fails (e.g., file missing).
+    Prioritizes 'GOOGLE_CREDENTIALS_JSON' env var, then falls back to local file.
     """
-    if not os.path.exists(CREDENTIALS_FILE):
-        return None
-    
     try:
-        gc = gspread.service_account(filename=CREDENTIALS_FILE)
+        # 1. Try Environment Variable (Best for Render/Production)
+        json_creds = os.getenv("GOOGLE_CREDENTIALS_JSON")
+        if json_creds:
+            creds_dict = json.loads(json_creds)
+            gc = gspread.service_account_from_dict(creds_dict)
+        
+        # 2. Try Local File (Best for Local Dev)
+        elif os.path.exists(CREDENTIALS_FILE):
+            gc = gspread.service_account(filename=CREDENTIALS_FILE)
+        
+        else:
+            print("No credentials found (Env var or file).")
+            return None
+
         sh = gc.open(SPREADSHEET_NAME)
         worksheet = sh.sheet1
         # Get all records as a list of dicts
         return worksheet.get_all_records()
+
     except Exception as e:
         print(f"Error connecting to Google Sheets: {e}")
         return None
