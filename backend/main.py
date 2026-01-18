@@ -55,7 +55,7 @@ class ContactForm(BaseModel):
 
 def load_mail_config():
     """
-    Loads email settings from 'MAIL_CONFIG_JSON' env var if present,
+    Loads email settings from 'MAIL_CONFIG_JSON' env var if present (this is the preferred method),
     or falls back to local 'env_vars/mail_config.json' file,
     otherwise falls back to individual environment variables.
     """
