@@ -12,6 +12,7 @@ env/
 # Secrets (IMPORTANT)
 service_account.json
 backend/service_account.json
+backend/env_vars/
 
 # Environment variables
 .env

@@ -14,7 +14,7 @@ app.mount("/static", StaticFiles(directory="../frontend"), name="static")
 
 # --- Google Sheets Setup ---
 # We will look for a file named 'service_account.json' in this directory
-CREDENTIALS_FILE = "service_account.json"
+CREDENTIALS_FILE = "env_vars/service_account.json"
 SPREADSHEET_NAME = "NewVegasEvents"
 
 def get_sheet_data():
@@ -56,9 +56,12 @@ class ContactForm(BaseModel):
 def load_mail_config():
     """
     Loads email settings from 'MAIL_CONFIG_JSON' env var if present,
+    or falls back to local 'env_vars/mail_config.json' file,
     otherwise falls back to individual environment variables.
     """
     json_config = os.getenv("MAIL_CONFIG_JSON")
+    local_config_file = "env_vars/mail_config.json"
+
     defaults = {
          "MAIL_USERNAME": "your-email@gmail.com",
          "MAIL_PASSWORD": "your-app-password",
@@ -68,18 +71,31 @@ def load_mail_config():
          "MAIL_RECIPIENT": None 
     }
     
-    # 1. Try loading from JSON
+    config = None
+
+    # 1. Try loading from Env Var (Priority)
     if json_config:
         try:
             config = json.loads(json_config)
-            # Ensure port is an integer
-            if "MAIL_PORT" in config:
-                config["MAIL_PORT"] = int(config["MAIL_PORT"])
-            return config
         except json.JSONDecodeError:
             print("Error parsing MAIL_CONFIG_JSON")
-            
-    # 2. Fallback to individual env vars
+
+    # 2. Try loading from Local File (if Env Var failed or not set)
+    if not config and os.path.exists(local_config_file):
+        try:
+            with open(local_config_file, 'r') as f:
+                config = json.load(f)
+        except Exception as e:
+            print(f"Error reading local mail config: {e}")
+
+    # Process config if found
+    if config:
+        # Ensure port is an integer
+        if "MAIL_PORT" in config:
+            config["MAIL_PORT"] = int(config["MAIL_PORT"])
+        return config
+
+    # 3. Fallback to individual env vars
     return {
         "MAIL_USERNAME": os.getenv("MAIL_USERNAME", defaults["MAIL_USERNAME"]),
         "MAIL_PASSWORD": os.getenv("MAIL_PASSWORD", defaults["MAIL_PASSWORD"]),
