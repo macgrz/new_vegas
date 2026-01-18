@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python + React App</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- React & Babel via CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [events, setEvents] = useState([]);
+
+            useEffect(() => {
+                const fetchEvents = async () => {
+                    try {
+                        const response = await fetch('/api/events');
+                        const data = await response.json();
+                        setEvents(data);
+                    } catch (error) {
+                        console.error('Error fetching events:', error);
+                    }
+                };
+                fetchEvents();
+            }, []);
+
+            return (
+                <div className="container">
+                    {/* Navigation */}
+                    <header>
+                        <div className="logo">New<span>Vegas</span></div>
+                        <nav>
+                            <a href="#hero">Start</a>
+                            <a href="#about">O nas</a>
+                            <a href="#offer">Co robimy</a>
+                            <a href="#gallery">Galeria</a>
+                            <a href="#events">Wydarzenia</a>
+                            <a href="#rules">Zasady</a>
+                            <a href="#contact">Kontakt</a>
+                        </nav>
+                    </header>
+
+                    <main>
+                        {/* Hero Section */}
+                        <section id="hero" className="hero-section">
+                            <h1>Miejsce z <span className="red-text">duszą</span></h1>
+                            <p style={{ maxWidth: '600px', margin: '0 auto 2rem', fontSize: '1.2rem', color: 'var(--text-secondary)' }}>
+                                Azyl na mapie Ursynowa. Bilard, kraftowe piwo, świetna pizza i muzyka, która łączy pokolenia.
+                            </p>
+                            <div>
+                                <a href="#contact" className="btn" style={{ marginRight: '1rem' }}>Wpadnij dziś</a>
+                                <a href="#events" className="btn" style={{ background: 'transparent', border: '1px solid var(--accent-color)' }}>Co gramy?</a>
+                            </div>
+                        </section>
+
+                        {/* About Section */}
+                        <section id="about">
+                            <h2 className="section-title">To nie tylko bar.<br />Historia <span className="red-text">Ursynowa</span>.</h2>
+                            <div className="text-content-box">
+                                <p style={{ color: '#fff', fontSize: '1.2rem', marginBottom: '1rem' }}>
+                                    Jesteśmy alternatywą dla sieciówek i sterylnych miejsc z katalogu. New Vegas to surowy klimat,
+                                    szczere rozmowy przy barze i ludzie, którzy tworzą to miejsce.
+                                </p>
+                                <p>
+                                    Od lat budujemy społeczność na Natolinie. Nieważne czy wpadasz na partyjkę bilarda,
+                                    koncert lokalnego składu czy po prostu zbić pionę z barmanem – tutaj zawsze czujesz się u siebie.
+                                </p>
+                            </div>
+                        </section>
+
+                        {/* Features / Co robimy */}
+                        <section id="offer">
+                            <h2 className="section-title">Co robimy <span className="red-text">dobrze</span></h2>
+                            <div className="features-grid">
+                                <div className="feature-card">
+                                    <div className="feature-icon">🍺</div>
+                                    <div className="feature-title">Zimne Napoje</div>
+                                    <p>Kraftowe piwa, klasyczne koktajle i shoty w uczciwych cenach. Bez zbędnego zadęcia.</p>
+                                </div>
+                                <div className="feature-card">
+                                    <div className="feature-icon">🍕</div>
+                                    <div className="feature-title">Solidna Pizza</div>
+                                    <p>Cienkie ciasto, dobre składniki. Idealna do piwa i dzielenia się ze znajomymi.</p>
+                                </div>
+                                <div className="feature-card">
+                                    <div className="feature-icon">🎱</div>
+                                    <div className="feature-title">Bilard & Rzutki</div>
+                                    <p>Profesjonalne stoły i tarcze. Gramy ligowo i rekreacyjnie. Rezerwuj stół online.</p>
+                                </div>
+                                <div className="feature-card">
+                                    <div className="feature-icon">🎤</div>
+                                    <div className="feature-title">Legendarny Karaoke</div>
+                                    <p>Czwartki to u nas świętość. Profesjonalne nagłośnienie i atmosfera, która porywa każdego.</p>
+                                </div>
+                                <div className="feature-card">
+                                    <div className="feature-icon">🎸</div>
+                                    <div className="feature-title">Gigi & Eventy</div>
+                                    <p>Mała scena, wielka energia. Koncerty, stand-up, gry planszowe. Dzieje się.</p>
+                                </div>
+                                <div className="feature-card">
+                                    <div className="feature-icon">❤️</div>
+                                    <div className="feature-title">Klimat Gratis</div>
+                                    <p>Tego nie kupisz. To tworzą ludzie. Wpadnij i poczuj vibe Ursynowa.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Gallery */}
+                        <section id="gallery">
+                            <h2 className="section-title">Klisze z <span className="red-text">Vegas</span></h2>
+                            <div className="gallery-grid">
+                                <div className="gallery-item"><div>Stolik Nr 1</div></div>
+                                <div className="gallery-item"><div>Nocne Śpiewy</div></div>
+                                <div className="gallery-item"><div>Turniej Darta</div></div>
+                                <div className="gallery-item"><div>Nasz Bar</div></div>
+                                <div className="gallery-item"><div>Koncert Live</div></div>
+                                <div className="gallery-item"><div>Ekipa</div></div>
+                            </div>
+                        </section>
+
+                        {/* Events */}
+                        <section id="events">
+                            <h2 className="section-title">Rozkład <span className="red-text">Jazdy</span></h2>
+                            <div className="events-list">
+                                {events.length === 0 ? (
+                                    <p style={{ textAlign: 'center' }}>Ładowanie wydarzeń...</p>
+                                ) : (
+                                    events.map((event, index) => (
+                                        <div className="event-card" key={index}>
+                                            <div className="event-date">
+                                                {event.Day}<br />
+                                                <span style={{ fontSize: '1.5rem' }}>{event.Time}</span>
+                                            </div>
+                                            <div className="event-details">
+                                                <h4>{event.Title}</h4>
+                                                <p style={{ marginBottom: 0 }}>{event.Description}</p>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </section>
+
+                        {/* Rules */}
+                        <section id="rules">
+                            <h2 className="section-title">Zasady <span className="red-text">Gry</span></h2>
+                            <div className="text-content-box" style={{ borderLeftColor: '#fff' }}>
+                                <p style={{ color: 'var(--text-secondary)' }}>
+                                    <strong style={{ color: '#fff' }}>REAL TALK:</strong> Nie jesteśmy klubem ani hotelem 5-gwiazdkowym.
+                                    Mamy ograniczoną przestrzeń, bywa głośno i ciasno – ale to część uroku.
+                                    <br /><br />
+                                    Szanujemy się nawzajem. Jeśli szukasz ciszy i białych obrusów – to raczej nie ten adres.
+                                    Jeśli szukasz miejsca, gdzie możesz być sobą – witamy w domu.
+                                    <br /><br />
+                                    <i>*Godziny zamknięcia są umowne. Jak jest impreza, to jest impreza.</i>
+                                </p>
+                            </div>
+                        </section>
+
+                        {/* Contact Section */}
+                        <section id="contact" className="contact-section">
+                            {/* Left Column: Info */}
+                            <div className="contact-info">
+                                <h2>Kontakt <span className="red-text">&</span> Info</h2>
+
+                                <div className="info-item">
+                                    <h3>Adres</h3>
+                                    <p style={{ color: '#fff', fontSize: '1.1rem' }}>Stanisława Kulczyńskiego 14</p>
+                                    <p>02-777 Warszawa (Metro Natolin)</p>
+                                    <p style={{ opacity: 0.7, fontSize: '0.85rem', marginTop: '0.5rem' }}>Wejście od strony pasażu. Szukaj czerwonego neonu.</p>
+                                </div>
+
+                                <div className="info-item">
+                                    <h3>Rezerwacje & Grupy</h3>
+                                    <p className="red-text" style={{ fontSize: '1.2rem', fontWeight: '700' }}>+48 500 000 000</p>
+                                    <p>Bilard, dart, rezerwacje powyżej 8 osób</p>
+                                </div>
+
+                                <div className="info-item">
+                                    <h3>Współpraca</h3>
+                                    <p>kontakt@newvegas.pl</p>
+                                    <p>Koncerty, stand-up, wydarzenia</p>
+                                </div>
+
+                                <div className="highlight-box">
+                                    <h3>Godziny Otwarcia</h3>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', maxWidth: '300px', marginBottom: '0.5rem' }}>
+                                        <span style={{ color: '#fff' }}>Wt-Czw:</span>
+                                        <span>17:00 - 01:00*</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', maxWidth: '300px', marginBottom: '0.5rem' }}>
+                                        <span style={{ color: '#fff' }}>Pt-Sob:</span>
+                                        <span>17:00 - 04:00*</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', maxWidth: '300px' }}>
+                                        <span style={{ color: '#fff' }}>Niedziela:</span>
+                                        <span>17:00 - 23:00</span>
+                                    </div>
+                                    <p style={{ fontSize: '0.8rem', marginTop: '1rem', fontStyle: 'italic' }}>*Zamykamy, gdy wyjdą ostatni goście.</p>
+                                </div>
+                            </div>
+
+                            {/* Right Column: Form */}
+                            <div className="contact-form-wrapper">
+                                <div className="contact-form">
+                                    <h3 style={{ marginBottom: '2rem' }}>Formularz kontaktowy</h3>
+                                    <div className="form-group">
+                                        <label>Imię / Nazwa</label>
+                                        <input type="text" placeholder="Jan Kowalski" />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Adres E-mail</label>
+                                        <input type="email" placeholder="jan@example.com" />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Temat</label>
+                                        <input type="text" placeholder="Rezerwacja / Pytanie" />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Wiadomość</label>
+                                        <textarea rows="4" placeholder="Twoja wiadomość..."></textarea>
+                                    </div>
+                                    <button className="btn">Wyślij Wiadomość</button>
+                                </div>
+                            </div>
+                        </section>
+                    </main>
+
+                    <footer style={{ borderTop: '1px solid var(--border-color)', padding: '2rem 0', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                        &copy; {new Date().getFullYear()} NEW VEGAS URSYNÓW. Wszystkie prawa zastrzeżone.<br />
+                        <span style={{ opacity: 0.5, fontSize: '0.8rem' }}>Projekt inspirowany new-vegas-ursynow.netlify.app</span>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
